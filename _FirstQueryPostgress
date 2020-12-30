@@ -1,0 +1,12 @@
+/*Query para obtener los totales de cosechas por division, rancho y entre un rango de fechas  */
+SELECT cosecha_divisiones_rancho.division_rancho_id,divisiones_rancho.nombre, sum(detalles_cosecha.cantidad),date_trunc('week',cosecha.fecha_cosecha + '1 day'::interval)::DATE - '1 day'::interval as semana, cosecha.fecha_cosecha, to_char(cosecha.fecha_cosecha::date+'1 day'::interval, 'IW') AS "Week Number"
+FROM public.divisiones_de_rancho as divisiones_rancho
+INNER JOIN public.ranchos as rancho ON divisiones_rancho.rancho_id=rancho.id
+INNER JOIN public.cosechas_divisiones_ranchos as cosecha_divisiones_rancho ON divisiones_rancho.id = cosecha_divisiones_rancho.division_rancho_id
+INNER JOIN public.cosechas as cosecha ON cosecha.id = cosecha_divisiones_rancho.cosecha_id
+INNER JOIN public.cosechas_detalles as detalles_cosecha ON detalles_cosecha.cosecha_id = cosecha.id
+INNER JOIN public.ciclos_de_cultivo as ciclos_cultivo ON ciclos_cultivo.id = cosecha.ciclo_cultivo_id
+INNER JOIN public.variedades as variedad on variedad.id = ciclos_cultivo.variedad_id
+WHERE rancho.nombre = 'EL MERCADILLO' AND divisiones_rancho.nombre = 'DIVISIÓN 3' and cosecha.fecha_cosecha between '2019-03-01' and '2019-03-31'
+group by  cosecha_divisiones_rancho.division_rancho_id,divisiones_rancho.nombre,cosecha.fecha_cosecha,variedad.nombre,Semana,detalles_cosecha.cantidad
+order by semana
